@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <bean class="redis.clients.jedis.JedisPool" id="jedisPool">
+      <constructor-arg name="host" value="192.168.0.203"></constructor-arg>
+      <constructor-arg name="port" value="6379"></constructor-arg>
+  </bean>
+
+    <bean id="jedisClient" class="com.taotao.service.jedis.JedisClientPool"></bean>
+    <!--启用注解，jedisClient中使用了autowired来注入jedispool，需要启用注解，不然的话需要在这里配置
+    或者有些是在文件中使用过的包扫描，开启包扫描自动开启注解驱动-->
+    <context:annotation-config></context:annotation-config>
+
+
+
+</beans>

@@ -37,7 +37,7 @@
         <dubbo.version>2.5.3</dubbo.version>
         <zookeeper.version>3.4.7</zookeeper.version>
         <zkclient.version>0.1</zkclient.version>
-        <activemq.version>5.11.2</activemq.version>
+        <activemq.version>5.15.2</activemq.version>
         <freemarker.version>2.3.23</freemarker.version>
         <quartz.version>2.2.2</quartz.version>
     </properties>
@@ -232,17 +232,18 @@
                 <version>${zookeeper.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/com.101tec/zkclient -->
+            <!-- https://mvnrepository.com/artifact/com.github.sgroschupf/zkclient -->
             <dependency>
-                <groupId>com.101tec</groupId>
+                <groupId>com.github.sgroschupf</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-core -->
+
+            <!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-all -->
             <dependency>
                 <groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-core</artifactId>
+                <artifactId>activemq-all</artifactId>
                 <version>${activemq.version}</version>
             </dependency>
 
@@ -252,6 +253,22 @@
                 <artifactId>freemarker</artifactId>
                 <version>${freemarker.version}</version>
             </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.springframework/spring-jms -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jms</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.springframework/spring-context-support -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+
 
         </dependencies>
     </dependencyManagement>

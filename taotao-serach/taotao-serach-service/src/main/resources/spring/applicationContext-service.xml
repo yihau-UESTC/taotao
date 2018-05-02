@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                          http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--配置扫描注解-->
+    <context:component-scan base-package="com.taotao.serach.service.impl"></context:component-scan>
+
+    <!--发布dubbo服务-->
+    <dubbo:application name="taotao-serach"></dubbo:application>
+    <dubbo:registry protocol="zookeeper" address="192.168.0.203:2181"></dubbo:registry>
+    <dubbo:protocol name="dubbo" port="20882"></dubbo:protocol>
+    <dubbo:service interface="com.taotao.serach.service.SerachItemService" ref="serachItemServiceImpl" timeout="300000"></dubbo:service>
+</beans>
