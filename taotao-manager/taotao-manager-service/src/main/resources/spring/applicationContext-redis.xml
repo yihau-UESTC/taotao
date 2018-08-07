@@ -2,19 +2,58 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/cache
+       http://www.springframework.org/schema/cache/spring-cache-4.2.xsd">
 
-  <bean class="redis.clients.jedis.JedisPool" id="jedisPool">
-      <constructor-arg name="host" value="192.168.0.203"></constructor-arg>
-      <constructor-arg name="port" value="6379"></constructor-arg>
-  </bean>
+  <!--<bean class="redis.clients.jedis.JedisPool" id="jedisPool">-->
+      <!--<constructor-arg name="host" value="192.168.0.203"></constructor-arg>-->
+      <!--<constructor-arg name="port" value="6379"></constructor-arg>-->
+  <!--</bean>-->
 
-    <bean id="jedisClient" class="com.taotao.jedis.JedisClientPool"></bean>
-    <!--启用注解，jedisClient中使用了autowired来注入jedispool，需要启用注解，不然的话需要在这里配置
-    或者有些是在文件中使用过的包扫描，开启包扫描自动开启注解驱动-->
-    <context:annotation-config></context:annotation-config>
+    <!--<bean id="jedisClient" class="com.taotao.jedis.JedisClientPool"></bean>-->
+    <!--&lt;!&ndash;&lt;!&ndash;启用注解，jedisClient中使用了autowired来注入jedispool，需要启用注解，不然的话需要在这里配置&ndash;&gt;-->
+    <!--&lt;!&ndash;或者有些是在文件中使用过的包扫描，开启包扫描自动开启注解驱动&ndash;&gt;&ndash;&gt;-->
+    <!--<context:annotation-config></context:annotation-config>-->
+    <!--<context:property-placeholder location="classpath:properties/redis.properties" ignore-unresolvable="true"></context:property-placeholder>-->
+    <!--配置redis配置-->
+    <cache:annotation-driven cache-manager="cacheManager"></cache:annotation-driven>
+    <bean class="redis.clients.jedis.JedisPoolConfig" id="jedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}"></property>
+        <property name="maxTotal" value="${redis.maxTotal}"></property>
+        <property name="maxWaitMillis" value="${redis.maxWait}"></property>
+        <property name="testOnBorrow" value="${redis.testOnBorrow}"></property>
+    </bean>
+    <!--配置redis连接池-->
+    <bean class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" id="jedisConnectionFactory">
+        <property name="hostName" value="${redis.host}"></property>
+        <property name="port" value="${redis.port}"></property>
+        <property name="poolConfig" ref="jedisPoolConfig"></property>
+    </bean>
+    <!--配置redis模板-->
+    <bean class="org.springframework.data.redis.core.RedisTemplate" id="redisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory"></property>
+    </bean>
 
+    <bean class="org.springframework.cache.support.SimpleCacheManager" id="cacheManager">
+        <property name="caches">
+            <set>
+                <bean class="com.taotao.utils.RedisCache">
+                    <property name="redisTemplate" ref="redisTemplate"></property>
+                    <property name="name" value="content"></property>
+                </bean>
+                <bean class="com.taotao.utils.RedisCache2">
+                    <property name="redisTemplate" ref="redisTemplate"></property>
+                    <property name="name" value="hash"></property>
+                </bean>
+            </set>
+        </property>
 
+    </bean>
 
 </beans>

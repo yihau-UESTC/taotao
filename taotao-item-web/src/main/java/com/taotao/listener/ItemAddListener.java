@@ -30,6 +30,8 @@ public class ItemAddListener implements MessageListener {
     @Value("${HTML_OUT_DIR}")
     private String HTML_OUT_DIR;
 
+    private int retryCount = 10;
+
     @Override
     public void onMessage(Message message) {
         if (message instanceof TextMessage){
@@ -38,16 +40,27 @@ public class ItemAddListener implements MessageListener {
                 String strId = textMessage.getText();
                 long itemId = Long.parseLong(strId);
                 Thread.sleep(1000);
-                TbItem tbItem = itemService.getItemById(itemId);
-                Item item = new Item(tbItem);
-                TbItemDesc itemDesc = itemService.getItemDescById(itemId);
-                Configuration configuration = freeMarkerConfigurer.getConfiguration();
-                Template template = configuration.getTemplate("item.ftl");
-                Writer out = new FileWriter(new File(HTML_OUT_DIR + itemId + ".html"));
-                Map map = new HashMap();
-                map.put("item", item);
-                map.put("itemDesc", itemDesc);
-                template.process(map, out);
+                TbItem tbItem = null;
+                int i = 0;
+                while (i < retryCount){
+                    tbItem = itemService.getItemById(itemId);
+                    if (tbItem != null){
+                        Item item = new Item(tbItem);
+                        TbItemDesc itemDesc = itemService.getItemDescById(itemId);
+                        Configuration configuration = freeMarkerConfigurer.getConfiguration();
+                        Template template = configuration.getTemplate("item.ftl");
+                        Writer out = new FileWriter(new File(HTML_OUT_DIR + itemId + ".html"));
+                        Map map = new HashMap();
+                        map.put("item", item);
+                        map.put("itemDesc", itemDesc);
+                        template.process(map, out);
+                    }else {
+                        i++;
+                    }
+                }
+                if (tbItem == null)
+                    throw new Exception("item id错误");
+
             } catch (JMSException e) {
                 e.printStackTrace();
             } catch (MalformedTemplateNameException e) {
@@ -61,6 +74,8 @@ public class ItemAddListener implements MessageListener {
             } catch (TemplateException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

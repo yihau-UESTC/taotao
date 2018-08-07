@@ -48,7 +48,7 @@
 
 
     <dubbo:application name="taotao-serach-web"></dubbo:application>
-    <dubbo:registry protocol="zookeeper" address="192.168.0.203:2181"></dubbo:registry>
+    <dubbo:registry protocol="zookeeper" address="192.168.1.203:2181"></dubbo:registry>
     <dubbo:reference interface="com.taotao.serach.service.SerachItemService" id="serachItemService" timeout="300000"></dubbo:reference>
     <!--<dubbo:reference interface="com.taotao.service.ItemCatService" id="itemCatService"></dubbo:reference>-->
     <!--<dubbo:reference interface="com.taotao.service.ContentCategoryService" id="contentCategoryService" timeout="300000"></dubbo:reference>-->

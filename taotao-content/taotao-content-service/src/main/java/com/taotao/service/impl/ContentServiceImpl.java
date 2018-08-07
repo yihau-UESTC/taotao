@@ -13,6 +13,8 @@ import com.taotao.service.ContentService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,8 +25,8 @@ public class ContentServiceImpl implements ContentService {
 
     @Autowired
     public TbContentMapper contentMapper;
-    @Autowired
-    public JedisClient jedisClient;
+//    @Autowired
+//    public JedisClient jedisClient;
     @Value("${INDEX_CONTENT}")
     public String INDEX_CONTENT;
 
@@ -46,7 +48,7 @@ public class ContentServiceImpl implements ContentService {
         result.setRows(contentList);
         return result;
     }
-
+    @CacheEvict(value = "INDEX_CONTENT", key = "#tbContent.categoryId")
     @Override
     public TaotaoResult addContent(TbContent tbContent) {
         Date date = new Date();
@@ -54,20 +56,22 @@ public class ContentServiceImpl implements ContentService {
         tbContent.setUpdated(date);
         contentMapper.insert(tbContent);
         //缓存同步
-        jedisClient.hdel(INDEX_CONTENT, tbContent.getCategoryId().toString());
+//        jedisClient.hdel(INDEX_CONTENT, tbContent.getCategoryId().toString());
         return TaotaoResult.ok();
     }
 
+    @CacheEvict(value = "INDEX_CONTENT", key = "#tbContent.categoryId")
     @Override
     public TaotaoResult editContent(TbContent tbContent) {
         Date date = new Date();
         tbContent.setUpdated(date);
         contentMapper.updateByPrimaryKeyWithBLOBs(tbContent);
         //缓存同步
-        jedisClient.hdel(INDEX_CONTENT, tbContent.getCategoryId().toString());
+//        jedisClient.hdel(INDEX_CONTENT, tbContent.getCategoryId().toString());
         return TaotaoResult.ok();
     }
 
+    //这里传过来的是一个字符串，包含多个值需要处理后才能得到商品id。
     @Override
     public TaotaoResult deleteContent(String ids) {
         String[] deleteIds = ids.split(",");
@@ -76,32 +80,41 @@ public class ContentServiceImpl implements ContentService {
         List<Long> list = new ArrayList<>();
         for (String s : deleteIds){
             list.add(Long.parseLong(s));
+            Long categoryId = contentMapper.selectByPrimaryKey(Long.parseLong(s)).getCategoryId();
+            cacheSyn(categoryId);
         }
         criteria.andIdIn(list);
         contentMapper.deleteByExample(example);
         return TaotaoResult.ok();
     }
 
+    @CacheEvict(value = "INDEX_CONTENT", key = "#categoryId")
+    @Override
+    public void cacheSyn(Long categoryId) {
+        System.out.println("===========getcategoryId=============");
+    }
+
+    @Cacheable(value = "INDEX_CONTENT", key = "#categoryId")
     @Override
     public List<TbContent> getContentList(Long categoryId) {
-        try {
-            String json = jedisClient.hget(INDEX_CONTENT, categoryId.toString());
-            if (!StringUtils.isBlank(json)){
-                return JSON.parseArray(json, TbContent.class);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try {
+//            String json = jedisClient.hget(INDEX_CONTENT, categoryId.toString());
+//            if (!StringUtils.isBlank(json)){
+//                return JSON.parseArray(json, TbContent.class);
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
         TbContentExample example = new TbContentExample();
         TbContentExample.Criteria criteria = example.createCriteria();
         criteria.andCategoryIdEqualTo(categoryId);
         List<TbContent> list = contentMapper.selectByExample(example);
-        try{
-            String json = JSON.toJSONString(list);
-            jedisClient.hset(INDEX_CONTENT, categoryId.toString(), json);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try{
+//            String json = JSON.toJSONString(list);
+//            jedisClient.hset(INDEX_CONTENT, categoryId.toString(), json);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
         return list;
     }
 }

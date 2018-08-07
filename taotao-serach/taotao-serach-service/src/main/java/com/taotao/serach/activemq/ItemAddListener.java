@@ -17,25 +17,34 @@ public class ItemAddListener implements MessageListener {
     @Autowired
     private HttpSolrServer httpSolrServer;
 
+    private int retryCount = 10;
     @Override
     public void onMessage(Message message){
         if (message instanceof TextMessage){
             try {
                 TextMessage textMessage = (TextMessage) message;
                 long id = Long.parseLong(textMessage.getText());
-                SerachItem item = serachItemService.importAddItem(id);
-                Thread.sleep(1000);
-                SolrInputDocument document = new SolrInputDocument();
-                document.addField("id", item.getId());
-                document.addField("item_title", item.getTitle());
-                document.addField("item_sell_point",item.getSell_point());
-                document.addField("item_price", item.getPrice());
-                document.addField("item_image",item.getImage());
-                document.addField("item_category_name", item.getCategory_name());
-                document.addField("item_desc", item.getItem_desc());
-                httpSolrServer.add(document);
-                httpSolrServer.commit();
-
+                SerachItem item = null;
+                int i = 0;
+                while (i < retryCount){
+                    item = serachItemService.importAddItem(id);
+                    if (item != null){
+                        SolrInputDocument document = new SolrInputDocument();
+                        document.addField("id", item.getId());
+                        document.addField("item_title", item.getTitle());
+                        document.addField("item_sell_point",item.getSell_point());
+                        document.addField("item_price", item.getPrice());
+                        document.addField("item_image",item.getImage());
+                        document.addField("item_category_name", item.getCategory_name());
+                        document.addField("item_desc", item.getItem_desc());
+                        httpSolrServer.add(document);
+                        httpSolrServer.commit();
+                    }else {
+                        i++;
+                    }
+                }
+                if (item == null)
+                    throw new Exception("item id 错误");
             } catch (Exception e) {
                 e.printStackTrace();
             }

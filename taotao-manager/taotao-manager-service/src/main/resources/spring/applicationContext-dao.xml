@@ -6,7 +6,7 @@
                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!--加载db资源文件-->
-    <context:property-placeholder location="classpath:properties/db.properties"></context:property-placeholder>
+    <context:property-placeholder location="classpath:properties/*.properties"></context:property-placeholder>
     <!--创建数据源，使用阿里巴巴的德鲁伊数据源-->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
         <property name="driverClassName" value="${jdbc.driver}"></property>

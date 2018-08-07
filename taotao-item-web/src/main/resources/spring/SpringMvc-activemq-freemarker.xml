@@ -17,7 +17,7 @@
 
 
     <bean id="activeMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="tcp://192.168.0.203:61616"></property>
+        <property name="brokerURL" value="tcp://192.168.1.203:61616"></property>
     </bean>
 
     <bean id="singleConnectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
@@ -34,7 +34,7 @@
         <property name="connectionFactory" ref="singleConnectionFactory"></property>
         <property name="destination" ref="itemAddTopic"></property>
         <property name="messageListener" ref="itemAddListener"></property>
-
+        <property name="sessionTransacted" value="true"></property>
     </bean>
 
 </beans>

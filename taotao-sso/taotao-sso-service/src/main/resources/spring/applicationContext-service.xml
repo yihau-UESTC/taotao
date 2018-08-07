@@ -12,7 +12,7 @@
 
     <!--发布dubbo服务-->
     <dubbo:application name="taotao-sso"></dubbo:application>
-    <dubbo:registry protocol="zookeeper" address="192.168.0.203:2181"></dubbo:registry>
+    <dubbo:registry protocol="zookeeper" address="192.168.1.203:2181"></dubbo:registry>
     <dubbo:protocol name="dubbo" port="20885"></dubbo:protocol>
     <dubbo:service interface="com.taotao.service.UserService" ref="userServiceImpl" timeout="300000"></dubbo:service>
     <!--<dubbo:service interface="com.taotao.service.ItemCatService" ref="itemCatServiceImpl" timeout="300000"></dubbo:service>-->

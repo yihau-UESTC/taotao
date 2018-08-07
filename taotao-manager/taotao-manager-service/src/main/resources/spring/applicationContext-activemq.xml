@@ -6,7 +6,7 @@
                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <bean id="activeMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="tcp://192.168.0.203:61616"></property>
+        <property name="brokerURL" value="tcp://192.168.1.203:61616"></property>
     </bean>
 
     <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
@@ -15,6 +15,8 @@
     
     <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
         <property name="connectionFactory" ref="connectionFactory"></property>
+        <property name="sessionTransacted" value="true"></property>
+        <property name="sessionAcknowledgeModeName" value="AUTO_ACKNOWLEDGE"></property>
     </bean>
 
     <bean id="itemAddTopic" class="org.apache.activemq.command.ActiveMQTopic">

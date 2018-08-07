@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+   <bean class="org.apache.activemq.RedeliveryPolicy" id="redeliveryPolicy">
+       <property name="maximumRedeliveries" value="10"></property>
+   </bean>
+
+    <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="connectionFactory">
+       <property name="brokerURL" value="tcp://192.168.1.203:61616"></property>
+       <property name="trustAllPackages" value="true"></property>
+       <property name="redeliveryPolicy" ref="redeliveryPolicy"></property>
+   </bean>
+
+    <bean class="org.springframework.jms.connection.SingleConnectionFactory" id="singleConnectionFactory">
+        <constructor-arg name="targetConnectionFactory" ref="connectionFactory"></constructor-arg>
+    </bean>
+
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="singleConnectionFactory"></property>
+    </bean>
+
+    <bean id="orderTopic" class="org.apache.activemq.command.ActiveMQTopic">
+        <property name="physicalName" value="order"></property>
+    </bean>
+    
+    <bean id="orderListener" class="com.taotao.listener.OrderListener">
+    </bean>
+
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="singleConnectionFactory"></property>
+        <property name="destination" ref="orderTopic"></property>
+        <property name="messageListener" ref="orderListener"></property>
+        <property name="sessionTransacted" value="true"></property>
+    </bean>
+
+</beans>

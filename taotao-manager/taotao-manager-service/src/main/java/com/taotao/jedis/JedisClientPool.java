@@ -9,6 +9,14 @@ public class JedisClientPool implements JedisClient {
 	@Autowired
 	private JedisPool jedisPool;
 
+	public JedisPool getJedisPool() {
+		return jedisPool;
+	}
+
+	public void setJedisPool(JedisPool jedisPool) {
+		this.jedisPool = jedisPool;
+	}
+
 	@Override
 	public String set(String key, String value) {
 		Jedis jedis = jedisPool.getResource();

@@ -1,10 +1,10 @@
 package com.taotao.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import com.taotao.pojo.OrderInfo;
 import com.taotao.pojo.TaotaoResult;
 import com.taotao.pojo.TbItem;
+import com.taotao.service.ItemService;
 import com.taotao.service.OrderService;
 import com.taotao.utils.CookieUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,12 +23,21 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private ItemService itemService;
 
     @RequestMapping("/order/order-cart")
     public String showOrder(HttpServletRequest request, Model model){
         //用户登录拦截
         //从cookie取出商品列表
         List<TbItem> itemList = getItemList(request);
+        //减库存
+        for (TbItem item : itemList) {
+            TaotaoResult result = itemService.reduceItemNum(item);
+            if(result.getData().equals("库存不足")){
+                return "error";
+            }
+        }
         model.addAttribute("cartList", itemList);
         return "order-cart";
     }
@@ -50,12 +57,17 @@ public class OrderController {
 
     @RequestMapping("/order/create")
     public String createOrder(OrderInfo orderInfo, Model model){
-        TaotaoResult result = orderService.creatOrder(orderInfo);
+        TaotaoResult result = orderService.createOrder(orderInfo);
         model.addAttribute("orderId",result.getData());
         model.addAttribute("payment", orderInfo.getPayment());
         DateTime dateTime =new DateTime();
         dateTime.plusDays(3);
         model.addAttribute("date",dateTime.toString());
         return "success";
+    }
+    @RequestMapping("/order/cancel")
+    public String cancelOrder(OrderInfo orderInfo){
+        TaotaoResult result = orderService.cancelOrder(orderInfo);
+        return "cancel";
     }
 }

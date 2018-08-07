@@ -42,7 +42,7 @@
     <!--<mvc:resources mapping="/js/**" location="/js/"></mvc:resources>-->
 
     <dubbo:application name="taotao-portal-web"></dubbo:application>
-    <dubbo:registry protocol="zookeeper" address="192.168.0.203:2181"></dubbo:registry>
+    <dubbo:registry protocol="zookeeper" address="192.168.1.203:2181"></dubbo:registry>
     <dubbo:reference interface="com.taotao.service.ContentService" id="contentService" timeout="300000"></dubbo:reference>
 
 

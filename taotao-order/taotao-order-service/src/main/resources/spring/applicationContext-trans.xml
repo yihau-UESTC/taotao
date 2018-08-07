@@ -17,7 +17,16 @@
         <property name="dataSource" ref="dataSource"></property>
     </bean>
     <!--通知-->
+    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="create*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="cancel*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
 
     <!--切面-->
-
+    <aop:config>
+        <aop:advisor advice-ref="myAdvice" pointcut="execution(* com.taotao.*.*.*(..))"></aop:advisor>
+    </aop:config>
 </beans>
