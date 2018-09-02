@@ -23,8 +23,8 @@
         <property name="connectionFactory" ref="singleConnectionFactory"></property>
     </bean>
 
-    <bean id="orderTopic" class="org.apache.activemq.command.ActiveMQTopic">
-        <property name="physicalName" value="order"></property>
+    <bean id="orderMsgTopic" class="org.apache.activemq.command.ActiveMQTopic">
+        <property name="physicalName" value="orderMsg"></property>
     </bean>
     
     <bean id="orderListener" class="com.taotao.listener.OrderListener">
@@ -32,9 +32,8 @@
 
     <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="singleConnectionFactory"></property>
-        <property name="destination" ref="orderTopic"></property>
+        <property name="destination" ref="orderMsgTopic"></property>
         <property name="messageListener" ref="orderListener"></property>
-        <property name="sessionTransacted" value="true"></property>
     </bean>
 
 </beans>

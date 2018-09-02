@@ -24,6 +24,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             resp.sendRedirect("http://localhost:8089/page/login?redirectUrl="+ url);
             return false;
         }
+        //TODO: 加入判断ip是否和原ip地址一致的逻辑
         TaotaoResult result = userService.getUserByToken(token);
         if (result.getStatus() != 200){
             String url = req.getRequestURL().toString();

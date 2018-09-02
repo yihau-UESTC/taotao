@@ -11,4 +11,5 @@
             <property name="dialect" value="mysql"></property>
         </plugin>
     </plugins>
+
 </configuration>

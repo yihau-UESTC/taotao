@@ -13,11 +13,15 @@
 	    http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!--配置平台事务管理器DataSourceTransactionManager,需要注入数据源，这里可以直接用dao配置文件中的bean，跟在一个文件中一样-->
-    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"></property>
+    <bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="itemDataSource"></property>
+    </bean>
+
+    <bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="orderDataSource"></property>
     </bean>
     <!--通知-->
-    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+    <tx:advice id="myAdvice1" transaction-manager="transactionManager1">
         <tx:attributes>
             <tx:method name="create*" propagation="REQUIRED"/>
             <tx:method name="insert*" propagation="REQUIRED"/>
@@ -25,8 +29,21 @@
         </tx:attributes>
     </tx:advice>
 
-    <!--切面-->
+    <tx:advice id="myAdvice2" transaction-manager="transactionManager2">
+        <tx:attributes>
+            <tx:method name="create*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="cancel*" propagation="REQUIRED"/>
+            <tx:method name="put*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--&lt;!&ndash;切面&ndash;&gt;-->
     <aop:config>
-        <aop:advisor advice-ref="myAdvice" pointcut="execution(* com.taotao.*.*.*(..))"></aop:advisor>
+        <aop:advisor advice-ref="myAdvice1" pointcut="execution(* com.taotao.*.*.*(..))"></aop:advisor>
+    </aop:config>
+
+    <aop:config>
+        <aop:advisor advice-ref="myAdvice2" pointcut="execution(* com.taotao.*.*.*(..))"></aop:advisor>
     </aop:config>
 </beans>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.taotao.dao1.TbOrderMsgMapper">
+    <select id="selectMsg" resultType="com.taotao.pojo.TbOrderMsg">
+      select * from tb_order_msg;
+    </select>
+
+    <insert id="insertOrderMsg" parameterType="com.taotao.pojo.TbOrderMsg">
+      insert into tb_order_msg (id, item_id, num) values (#{id}, #{itemId}, #{num})
+    </insert>
+  
+    <delete id="deleteOrderMsgByOrderId" parameterType="long">
+      delete from tb_order_msg where id = #{id}
+    </delete>
+</mapper>

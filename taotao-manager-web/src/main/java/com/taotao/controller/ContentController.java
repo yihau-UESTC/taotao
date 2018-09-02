@@ -31,7 +31,12 @@ public class ContentController {
     @ResponseBody
     @RequestMapping("/content/delete")
     public TaotaoResult deleteContent(String ids){
-        return contentService.deleteContent(ids);
+        String[] split = ids.split(",");
+        for (String s : split){
+            Long category = contentService.getCategory(Long.parseLong(s));
+            contentService.deleteContent(category);
+        }
+        return TaotaoResult.ok();
     }
 
     @ResponseBody

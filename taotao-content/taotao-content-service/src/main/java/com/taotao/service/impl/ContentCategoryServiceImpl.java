@@ -1,6 +1,6 @@
 package com.taotao.service.impl;
 
-import com.taotao.dao.TbContentCategoryMapper;
+import com.taotao.dao1.TbContentCategoryMapper;
 import com.taotao.pojo.*;
 import com.taotao.service.ContentCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -11,10 +11,10 @@
        http://www.springframework.org/schema/cache
        http://www.springframework.org/schema/cache/spring-cache-4.2.xsd">
 
-  <!--<bean class="redis.clients.jedis.JedisPool" id="jedisPool">-->
-      <!--<constructor-arg name="host" value="192.168.0.203"></constructor-arg>-->
-      <!--<constructor-arg name="port" value="6379"></constructor-arg>-->
-  <!--</bean>-->
+      <bean class="redis.clients.jedis.JedisPool" id="jedisPool">
+          <constructor-arg name="host" value="${redis.host}"></constructor-arg>
+          <constructor-arg name="port" value="${redis.port}"></constructor-arg>
+      </bean>
 
     <!--<bean id="jedisClient" class="com.taotao.jedis.JedisClientPool"></bean>-->
     <!--&lt;!&ndash;&lt;!&ndash;启用注解，jedisClient中使用了autowired来注入jedispool，需要启用注解，不然的话需要在这里配置&ndash;&gt;-->
@@ -45,15 +45,16 @@
             <set>
                 <bean class="com.taotao.utils.RedisCache">
                     <property name="redisTemplate" ref="redisTemplate"></property>
-                    <property name="name" value="content"></property>
-                </bean>
-                <bean class="com.taotao.utils.RedisCache2">
-                    <property name="redisTemplate" ref="redisTemplate"></property>
-                    <property name="name" value="hash"></property>
+                    <property name="name" value="ITEM"></property>
+                    <property name="timeout" value="3600"></property>
                 </bean>
             </set>
         </property>
 
+    </bean>
+
+    <bean class="com.taotao.jedis.JedisClientPool" id="jedisClient">
+        <property name="jedisPool" ref="jedisPool"></property>
     </bean>
 
 </beans>

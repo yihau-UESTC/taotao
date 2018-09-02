@@ -1,14 +1,9 @@
 package com.taotao.listener;
 
-import com.taotao.dao.TbOrderItemMapper;
-import com.taotao.dao.TbOrderMapper;
-import com.taotao.dao.TbOrderShippingMapper;
-import com.taotao.dao.TbUserMapper;
-import com.taotao.pojo.OrderInfo;
-import com.taotao.pojo.TbOrderItem;
+import com.taotao.dao2.TbOrderShippingMapper;
+import com.taotao.dao1.TbUserMapper;
 import com.taotao.pojo.TbOrderShipping;
 import com.taotao.pojo.TbUser;
-import com.taotao.service.jedis.JedisClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.Test;
@@ -19,8 +14,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:spring/applicationContext-dao.xml"})

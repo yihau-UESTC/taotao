@@ -1,8 +1,8 @@
 package com.taotao.listener;
 
-import com.taotao.dao.TbOrderItemMapper;
-import com.taotao.dao.TbOrderMapper;
-import com.taotao.dao.TbOrderShippingMapper;
+import com.taotao.dao2.TbOrderItemMapper;
+import com.taotao.dao2.TbOrderMapper;
+import com.taotao.dao2.TbOrderShippingMapper;
 import com.taotao.pojo.OrderInfo;
 import com.taotao.pojo.TbOrderItem;
 import com.taotao.pojo.TbOrderShipping;
@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:spring/application*.xml"})
 public class OrderListenerTest {

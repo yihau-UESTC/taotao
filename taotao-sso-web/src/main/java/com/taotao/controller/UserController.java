@@ -5,6 +5,8 @@ import com.taotao.pojo.TaotaoResult;
 import com.taotao.pojo.TbUser;
 import com.taotao.service.UserService;
 import com.taotao.utils.CookieUtils;
+import com.taotao.utils.NetworkUtil;
+import org.apache.http.client.methods.HttpHead;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Controller
 public class UserController {
@@ -37,7 +40,13 @@ public class UserController {
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
     @ResponseBody
     public TaotaoResult login(String username, String password, HttpServletRequest request, HttpServletResponse response){
-        TaotaoResult result = userService.login(username,password);
+        String ipAddress = null;
+        try {
+             ipAddress = NetworkUtil.getIpAddress(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TaotaoResult result = userService.login(username,password, ipAddress);
         if (result.getStatus() == 200) {
             String token = result.getData().toString();
             CookieUtils.setCookie(request, response, "TOKEN_KEY", token);

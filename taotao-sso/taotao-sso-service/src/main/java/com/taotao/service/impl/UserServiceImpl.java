@@ -1,8 +1,7 @@
 package com.taotao.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import com.taotao.dao.TbUserMapper;
+import com.taotao.dao1.TbUserMapper;
 import com.taotao.pojo.TaotaoResult;
 import com.taotao.pojo.TbUser;
 import com.taotao.pojo.TbUserExample;
@@ -78,7 +77,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TaotaoResult login(String username, String password) {
+    public TaotaoResult login(String username, String password, String ip) {
         TbUserExample example = new TbUserExample();
         TbUserExample.Criteria criteria = example.createCriteria();
         criteria.andUsernameEqualTo(username);
@@ -89,6 +88,7 @@ public class UserServiceImpl implements UserService {
             if (MD5pwd.equals(user.getPassword())){
                 user.setPassword(null);
                 String uuid = UUID.randomUUID().toString();
+                //TODO:HSET 加入ip信息
                 jedisClient.set("TT_TOKEN:" + uuid, JSON.toJSONString(user));
                 jedisClient.expire("TT_TOKEN:" + uuid, 1800);
                 return TaotaoResult.ok(uuid);

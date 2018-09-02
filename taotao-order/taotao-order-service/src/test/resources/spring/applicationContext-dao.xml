@@ -6,24 +6,52 @@
                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!--加载db资源文件-->
-    <context:property-placeholder location="classpath:properties/*.properties"></context:property-placeholder>
-    <!--创建数据源，使用阿里巴巴的德鲁伊数据源-->
-    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+    <context:property-placeholder location="classpath:properties/db.properties"></context:property-placeholder>
+    <!--创建数据源1 库存中心的数据源，使用阿里巴巴的德鲁伊数据源-->
+    <bean id="itemDataSource" class="com.alibaba.druid.pool.DruidDataSource">
         <property name="driverClassName" value="${jdbc.driver}"></property>
         <property name="url" value="${jdbc.url}"></property>
         <property name="username" value="${jdbc.username}"></property>
         <property name="password" value="${jdbc.password}"></property>
     </bean>
+    <!--创建数据源2 订单中心的数据源-->
+    <bean id="orderDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+        <property name="url" value="${jdbc2.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+
+    <!--<bean class="com.taotao.utils.DynamicDataSource" id="dataSource">-->
+        <!--<property name="targetDataSources">-->
+            <!--<map key-type="java.lang.String">-->
+                <!--<entry key="itemDataSource" value-ref="itemDataSource"></entry>-->
+                <!--<entry key="orderDataSource" value-ref="orderDataSource"></entry>-->
+            <!--</map>-->
+        <!--</property>-->
+        <!--<property name="defaultTargetDataSource" ref="itemDataSource"></property>-->
+    <!--</bean>-->
+
     <!--配置mybatis的sqlSessionFactory,使用的是mybatis提供的整合包,需要注入dataSource和mybatis的核心配置文件SqlMapConfig.xml-->
-    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource"></property>
+    <bean id="itemSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="itemDataSource"></property>
         <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
     </bean>
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.taotao.dao"></property>
+        <property name="basePackage" value="com.taotao.dao1"></property>
+        <property name="sqlSessionFactoryBeanName" value="itemSqlSessionFactory"></property>
     </bean>
 
+    <bean id="orderSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="orderDataSource"></property>
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.taotao.dao2"></property>
+        <property name="sqlSessionFactoryBeanName" value="orderSqlSessionFactory"></property>
+    </bean>
 
 
 

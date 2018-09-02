@@ -27,6 +27,16 @@ public class RedisCache implements Cache {
     private RedisTemplate<String, Object> redisTemplate;
     private String name;
 
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
+    private long timeout;
+
     @Override
     public String getName() {
         return this.name;
@@ -51,6 +61,7 @@ public class RedisCache implements Cache {
                     System.out.println("-----缓存不存在------");
                     return null;
                 }
+                connection.expire(key, timeout);
                 return SerializationUtils.deserialize(value);
             }
         });
@@ -74,7 +85,7 @@ public class RedisCache implements Cache {
         System.out.println("----加入缓存----; key = " + key + ", value = " + value);
         final String keyString = key.toString();
         final Object valuef = value;
-        final long liveTime = 86400;
+        final long liveTime = timeout;
         redisTemplate.execute(new RedisCallback<Object>() {
             @Override
             public Object doInRedis(RedisConnection connection) throws DataAccessException {

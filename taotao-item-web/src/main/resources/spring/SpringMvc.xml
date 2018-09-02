@@ -13,8 +13,8 @@
     <context:component-scan base-package="com.taotao.controller"></context:component-scan>
 
     <context:property-placeholder location="classpath:resource.properties"></context:property-placeholder>
-
-
+    <!--配置启动事件监听器-->
+    <bean class="com.taotao.scanner.StartupListener"></bean>
     <!--配置处理器映射器和处理器适配器，一般选择直接使用注解驱动来配置-->
     <!--可以在这里面配置一些转换器，自定义的转换器，json转换器-->
     <mvc:annotation-driven>
@@ -29,19 +29,33 @@
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+    <!--配置多视图解析器，freemarkerview-html需要先配置freemarkerConfig,
+     internalResourceVeiw-jsp，配置了优先级，springmvc会先匹配html的在匹配jsp的-->
+    <!--<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">-->
+        <!--<property name="templateLoaderPath">-->
+            <!--<value>/WEB-INF/html</value>-->
+        <!--</property>-->
+    <!--</bean>-->
 
-    <!--配置视图解析器-->
+    <!--<bean id="htmlViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">-->
+        <!--<property name="suffix" value=".html"></property>-->
+        <!--<property name="order" value="0"></property>-->
+        <!--<property name="contentType" value="text/html;charset=UTF-8"></property>-->
+    <!--</bean>-->
+
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <!--可以在这里面配置页面路径的前缀和后缀,如果不在这里配置，在代码中需要写全-->
         <property name="prefix" value="/WEB-INF/jsp/"></property>
         <property name="suffix" value=".jsp"></property>
+        <property name="order" value="1"></property>
     </bean>
 
     <!--配置静态资源映射-->
     <!--<mvc:resources mapping="/css/**" location="/css/"></mvc:resources>-->
     <!--<mvc:resources mapping="/js/**" location="/js/"></mvc:resources>-->
 
-    <dubbo:application name="taotao-portal-web"></dubbo:application>
+
+    <dubbo:application name="taotao-item-web"></dubbo:application>
     <dubbo:registry protocol="zookeeper" address="192.168.1.203:2181"></dubbo:registry>
     <dubbo:reference interface="com.taotao.service.ItemService" id="itemService" timeout="300000"></dubbo:reference>
 

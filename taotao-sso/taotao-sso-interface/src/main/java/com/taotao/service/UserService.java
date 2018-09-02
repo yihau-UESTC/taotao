@@ -6,7 +6,7 @@ import com.taotao.pojo.TbUser;
 public interface UserService {
     TaotaoResult checkData(String param, int type);
     TaotaoResult register(TbUser user);
-    TaotaoResult login(String username, String password);
+    TaotaoResult login(String username, String password, String ip);
     TaotaoResult getUserByToken(String token);
     TaotaoResult logout(String token);
 }

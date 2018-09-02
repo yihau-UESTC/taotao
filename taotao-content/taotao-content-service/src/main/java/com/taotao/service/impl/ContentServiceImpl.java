@@ -1,23 +1,18 @@
 package com.taotao.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.taotao.dao.TbContentMapper;
-import com.taotao.jedis.JedisClient;
+import com.taotao.dao1.TbContentMapper;
 import com.taotao.pojo.EasyUIDataGridResult;
 import com.taotao.pojo.TaotaoResult;
 import com.taotao.pojo.TbContent;
 import com.taotao.pojo.TbContentExample;
 import com.taotao.service.ContentService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 @Service
@@ -27,8 +22,7 @@ public class ContentServiceImpl implements ContentService {
     public TbContentMapper contentMapper;
 //    @Autowired
 //    public JedisClient jedisClient;
-    @Value("${INDEX_CONTENT}")
-    public String INDEX_CONTENT;
+    public final String INDEX_CONTENT = "INDEX_CONTENT";
 
 
     @Override
@@ -48,7 +42,7 @@ public class ContentServiceImpl implements ContentService {
         result.setRows(contentList);
         return result;
     }
-    @CacheEvict(value = "INDEX_CONTENT", key = "#tbContent.categoryId")
+    @CacheEvict(value =INDEX_CONTENT, key = "#tbContent.categoryId")
     @Override
     public TaotaoResult addContent(TbContent tbContent) {
         Date date = new Date();
@@ -60,7 +54,7 @@ public class ContentServiceImpl implements ContentService {
         return TaotaoResult.ok();
     }
 
-    @CacheEvict(value = "INDEX_CONTENT", key = "#tbContent.categoryId")
+    @CacheEvict(value = INDEX_CONTENT, key = "#tbContent.categoryId")
     @Override
     public TaotaoResult editContent(TbContent tbContent) {
         Date date = new Date();
@@ -72,29 +66,26 @@ public class ContentServiceImpl implements ContentService {
     }
 
     //这里传过来的是一个字符串，包含多个值需要处理后才能得到商品id。
+    @CacheEvict(value = INDEX_CONTENT, key = "#categoryId")
     @Override
-    public TaotaoResult deleteContent(String ids) {
-        String[] deleteIds = ids.split(",");
+    public TaotaoResult deleteContent(Long categoryId) {
         TbContentExample example = new TbContentExample();
         TbContentExample.Criteria criteria = example.createCriteria();
-        List<Long> list = new ArrayList<>();
-        for (String s : deleteIds){
-            list.add(Long.parseLong(s));
-            Long categoryId = contentMapper.selectByPrimaryKey(Long.parseLong(s)).getCategoryId();
-            cacheSyn(categoryId);
-        }
-        criteria.andIdIn(list);
+        criteria.andCategoryIdEqualTo(categoryId);
         contentMapper.deleteByExample(example);
         return TaotaoResult.ok();
     }
 
-    @CacheEvict(value = "INDEX_CONTENT", key = "#categoryId")
     @Override
-    public void cacheSyn(Long categoryId) {
-        System.out.println("===========getcategoryId=============");
+    public Long getCategory(Long id) {
+        TbContent tbContent = contentMapper.selectByPrimaryKey(id);
+        if (tbContent != null)
+            return tbContent.getCategoryId();
+        throw new IllegalArgumentException("id is empty");
     }
 
-    @Cacheable(value = "INDEX_CONTENT", key = "#categoryId")
+
+    @Cacheable(value = INDEX_CONTENT, key = "#categoryId")
     @Override
     public List<TbContent> getContentList(Long categoryId) {
 //        try {

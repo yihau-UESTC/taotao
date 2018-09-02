@@ -20,14 +20,19 @@
 
     <!--配置cache注解驱动-->
     <cache:annotation-driven cache-manager="cacheManager"></cache:annotation-driven>
+
+    <bean class="com.taotao.jedis.RedisCache" id="indexContentCache">
+        <property name="name" value="INDEX_CONTENT"></property>
+        <property name="redisTemplate" ref="redisTemplate"></property>
+    </bean>
+
     <!--配置缓存管理器-->
     <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
         <!--这里可以配置不同的cache，多个cache使用set元素包裹-->
         <property name="caches">
-            <bean class="com.taotao.jedis.RedisCache">
-                <property name="name" value="INDEX_CONTENT"></property>
-                <property name="redisTemplate" ref="redisTemplate"></property>
-            </bean>
+            <set>
+                <ref bean="indexContentCache"></ref>
+            </set>
         </property>
     </bean>
     <!--配置redis配置-->

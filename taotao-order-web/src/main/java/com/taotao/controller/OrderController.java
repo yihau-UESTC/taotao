@@ -27,28 +27,26 @@ public class OrderController {
     private ItemService itemService;
 
     @RequestMapping("/order/order-cart")
-    public String showOrder(HttpServletRequest request, Model model){
+    public String showOrder(HttpServletRequest request, Model model) {
         //用户登录拦截
         //从cookie取出商品列表
         List<TbItem> itemList = getItemList(request);
         //减库存
-        for (TbItem item : itemList) {
-            TaotaoResult result = itemService.reduceItemNum(item);
-            if(result.getData().equals("库存不足")){
-                return "error";
-            }
+        TaotaoResult result = itemService.queryItemNum(itemList);
+        if (result.getMsg().equals("库存不足")) {
+            return "error";
         }
         model.addAttribute("cartList", itemList);
         return "order-cart";
     }
 
-    private List<TbItem> getItemList(HttpServletRequest request){
-        String cartKey = CookieUtils.getCookieValue(request, "CART_KEY",true);
-        if (StringUtils.isBlank(cartKey))return new ArrayList<>();
-        List<TbItem> list = JSON.parseArray(cartKey,TbItem.class);
-        for (TbItem item : list){
+    private List<TbItem> getItemList(HttpServletRequest request) {
+        String cartKey = CookieUtils.getCookieValue(request, "CART_KEY", true);
+        if (StringUtils.isBlank(cartKey)) return new ArrayList<>();
+        List<TbItem> list = JSON.parseArray(cartKey, TbItem.class);
+        for (TbItem item : list) {
             String images = item.getImage();
-            if (StringUtils.isBlank(images))continue;
+            if (StringUtils.isBlank(images)) continue;
             String[] imageArray = images.split(",");
             item.setImage(imageArray[0]);
         }
@@ -56,17 +54,18 @@ public class OrderController {
     }
 
     @RequestMapping("/order/create")
-    public String createOrder(OrderInfo orderInfo, Model model){
-        TaotaoResult result = orderService.createOrder(orderInfo);
-        model.addAttribute("orderId",result.getData());
-        model.addAttribute("payment", orderInfo.getPayment());
-        DateTime dateTime =new DateTime();
-        dateTime.plusDays(3);
-        model.addAttribute("date",dateTime.toString());
+    public String createOrder(HttpServletRequest request, Model model) {
+        //读商品
+        List<TbItem> itemList = getItemList(request);
+        //扣库存,插入本地消息表，返回页面
+        TaotaoResult result = itemService.reduceItemNum(itemList);
+        if (result.getMsg().equals("库存不足"))
+            return "error";
         return "success";
     }
+
     @RequestMapping("/order/cancel")
-    public String cancelOrder(OrderInfo orderInfo){
+    public String cancelOrder(OrderInfo orderInfo) {
         TaotaoResult result = orderService.cancelOrder(orderInfo);
         return "cancel";
     }

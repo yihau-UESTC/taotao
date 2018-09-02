@@ -10,7 +10,7 @@ public interface ContentService {
     EasyUIDataGridResult getContentList(Long categoryId, Integer page, Integer rows);
     TaotaoResult addContent(TbContent tbContent);
     TaotaoResult editContent(TbContent tbContent);
-    TaotaoResult deleteContent(String ids);
-    void cacheSyn(Long categoryId);
+    TaotaoResult deleteContent(Long categoryId);
+    Long getCategory(Long id);
     List<TbContent> getContentList(Long categoryId);
 }

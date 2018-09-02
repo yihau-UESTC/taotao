@@ -1,17 +1,18 @@
 package com.taotao.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.taotao.dao.TbItemDescMapper;
-import com.taotao.dao.TbItemMapper;
+import com.taotao.dao1.TbItemDescMapper;
+import com.taotao.dao1.TbItemMapper;
+import com.taotao.dao1.TbOrderMsgMapper;
 import com.taotao.jedis.JedisClient;
 import com.taotao.pojo.*;
 import com.taotao.service.ItemService;
 import com.taotao.utils.IDUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
@@ -30,33 +31,21 @@ public class ItemServiceImpl implements ItemService {
     private TbItemDescMapper itemDescMapper;
     @Autowired
     private JmsTemplate jmsTemplate;
+    @Autowired
+    private TbOrderMsgMapper orderMsgMapper;
+    @Autowired
+    private JedisClient jedisClient;
 
     @Resource(name="itemAddTopic")
     private Destination destination;
 
-//    @Autowired
-//    private JedisClient jedisClient;
+    private final String ITEM = "ITEM";
 
-    @Cacheable(value = "hash",key = "'ITEM_INFO:' + #itemId + ':BASE'")
+
+    @Cacheable(value = ITEM, key = "'ITEM_INFO:' + #itemId + ':BASE'")
     @Override
     public TbItem getItemById(long itemId) {
-//        try{
-//            String str = jedisClient.get("ITEM_INFO:" + itemId + ":BASE");
-//            if (!StringUtils.isBlank(str)){
-//                TbItem result = JSON.parseObject(str, TbItem.class);
-//                return result;
-//            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
         TbItem tbItem = itemMapper.selectByPrimaryKey(itemId);
-//        try{
-//            //1、加入缓存，2、设置过期时间
-//            jedisClient.set("ITEM_INFO:" + itemId + ":BASE", JSON.toJSONString(tbItem));
-//            jedisClient.expire("ITEM_INFO:" + itemId + ":BASE",86400);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
         return tbItem;
     }
 
@@ -71,9 +60,12 @@ public class ItemServiceImpl implements ItemService {
         result.setRows(list);
         return result;
     }
-
+    @Caching(evict = {
+            @CacheEvict(value = ITEM, key = "'ITEM_INFO:' + #item.id + ':BASE'"),
+            @CacheEvict(value = ITEM, key = "'ITEM_INFO:' + #item.id + ':DESC'")
+    })
     @Override
-    public TaotaoResult saveItem(TbItem item, String desc)throws Throwable {
+    public TaotaoResult saveItem(TbItem item, String desc){
         //生成商品id，使用时间戳 + 两位的随机数
         final long id = IDUtils.genItemId();
         item.setId(id);
@@ -104,43 +96,54 @@ public class ItemServiceImpl implements ItemService {
         return TaotaoResult.ok();
     }
 
-    @Cacheable(value = "content",key = "'ITEM_INFO:' + #itemId + ':DESC'")
+    @Cacheable(value = ITEM, key = "'ITEM_INFO:' + #itemId + ':DESC'")
     @Override
     public TbItemDesc getItemDescById(long itemId) {
-//        try{
-//            String str = jedisClient.get("ITEM_INFO:" + itemId + ":DESC");
-//            if (!StringUtils.isBlank(str)){
-//                TbItemDesc result = JSON.parseObject(str, TbItemDesc.class);
-//                return result;
-//            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
         TbItemDesc tbItemDesc = itemDescMapper.selectByPrimaryKey(itemId);
-//        try{
-//            //1、加入缓存，2、设置过期时间
-//            jedisClient.set("ITEM_INFO:" + itemId + ":DESC", JSON.toJSONString(tbItemDesc));
-//            jedisClient.expire("ITEM_INFO:" + itemId + ":DESC",86400);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
         return tbItemDesc;
     }
 
     @Override
-    public TaotaoResult reduceItemNum(TbItem item) {
+    public TaotaoResult queryItemNum(List<TbItem> items) {
         TaotaoResult result = null;
-        long itemId = item.getId();
-        TbItem itemOld = itemMapper.selectByPrimaryKey(itemId);
-        if (itemOld.getNum() >= item.getNum()){
-            itemOld.setNum(itemOld.getNum() - item.getNum());
-            itemMapper.updateByPrimaryKey(itemOld);
-            result = TaotaoResult.ok("successful");
-        }else {
-            result = TaotaoResult.ok("库存不足");
+        for (TbItem item : items){
+            long itemId = item.getId();
+            TbItem itemOld = itemMapper.selectByPrimaryKey(itemId);
+            if (itemOld.getNum() < item.getNum()){
+                result = TaotaoResult.build(200, "库存不足", item.getId());
+                return result;
+            }
         }
+        result = TaotaoResult.build(200, "库存充足", null);
         return result;
     }
 
-
+    @Override
+    public TaotaoResult reduceItemNum(List<TbItem> items) {
+        TaotaoResult result = null;
+        for (TbItem item : items){
+            long itemId = item.getId();
+            TbItem itemOld = itemMapper.selectByPrimaryKey(itemId);
+            if (itemOld.getNum() < item.getNum()){
+                result = TaotaoResult.build(200, "库存不足", item.getId());
+                return result;
+            }
+            itemOld.setNum(itemOld.getNum() - item.getNum());
+            itemMapper.updateByPrimaryKey(itemOld);
+        }
+        if (items.size() > 0){
+            TbItem item = items.get(0);
+            TbOrderMsg msg = new TbOrderMsg();
+            if (!jedisClient.exists("ORDER_ID_GEN")){
+                jedisClient.set("ORDER_ID_GEN", "10054");
+            }
+            long orderId = jedisClient.incr("ORDER_ID_GEN");
+            msg.setId(orderId);
+            msg.setItemId(item.getId());
+            msg.setNum(item.getNum());
+            orderMsgMapper.insertOrderMsg(msg);
+        }
+        result = TaotaoResult.build(200, "库存充足", null);
+        return result;
+    }
 }
